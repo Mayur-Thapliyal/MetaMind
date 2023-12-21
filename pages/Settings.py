@@ -1,14 +1,50 @@
 import streamlit as st 
-from dotenv import set_key,get_key
-GOOGLE_API_KEY = get_key('.env','GOOGLE_API_KEY')
-
-if GOOGLE_API_KEY:
-    MASKED_GOOGLE_API_KEY = GOOGLE_API_KEY[-4:].rjust(len(GOOGLE_API_KEY), '*')
-    GOOGLE_API_KEY = st.text_input( "GOOGLE API KEY",
-                                    placeholder=MASKED_GOOGLE_API_KEY,)
+from const import MODEL_OPTIONS
+from streamlit_ws_localstorage import injectWebsocketCode, getOrCreateUID
+local_storage = injectWebsocketCode(hostPort='282a-122-176-112-241.ngrok-free.app', uid=getOrCreateUID())
+def saveButtonHandler(key,value):
+    local_storage.setLocalStorageVal(key,value)
+def api_key_component(key_name):
+    
+    code_peace = (f"""
+API_KEY = local_storage.getLocalStorageVal('{key_name}')
+if API_KEY:
+    MASKED_API_KEY = API_KEY[-4:].rjust(len(API_KEY), '*')
+    API_KEY = st.text_input( "API KEY",
+                                    placeholder=MASKED_API_KEY)
 else:
-    GOOGLE_API_KEY = st.text_input( "GOOGLE API KEY")
+    API_KEY = st.text_input( "API KEY")
+    local_storage.setLocalStorageVal("{key_name}",API_KEY)
+st.button(label="Save",on_click=saveButtonHandler("{key_name}",API_KEY))
+    """)
+    exec(code_peace)
+    
+    
 
-if GOOGLE_API_KEY:
-    set_key(".env",'GOOGLE_API_KEY',GOOGLE_API_KEY)
-    "Changes Saved"
+    
+model_value = local_storage.getLocalStorageVal('SELECTED_MODEL')
+model_value
+if model_value:
+    model_index=MODEL_OPTIONS.index(model_value)
+    model = st.selectbox(
+        label="Select the language model",
+        options=MODEL_OPTIONS,
+        placeholder="Choose your Model",
+        index=model_index
+    )
+else:
+    model = st.selectbox(
+        label="Select the language model",
+        options=["OpenAI", "Google Gemini", "Azure OpenAI", "GPT4All"],
+        placeholder="Choose your Model",
+    )
+if model_value != model:
+    local_storage.setLocalStorageVal('SELECTED_MODEL',model)
+if model_value == 'OpenAI':
+    api_key_component(key_name="OpenAI_API_KEY")
+elif model_value  == "Google Gemini":
+    api_key_component(key_name="Gemini_API_KEY")
+elif model_value  == "":
+    pass
+elif model_value  == "":
+    pass
