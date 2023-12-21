@@ -1,0 +1,1 @@
+MODEL_OPTIONS = ("OpenAI", "Google Gemini", "Azure OpenAI", "GPT4All")
