@@ -2,15 +2,17 @@ import streamlit as st
 import numpy as np
 import google.generativeai as genai
 import os 
+from utils import get_local_storage_value,set_local_storage_value
 from streamlit_ws_localstorage import injectWebsocketCode, getOrCreateUID
-local_storage = injectWebsocketCode(hostPort='282a-122-176-112-241.ngrok-free.app', uid=getOrCreateUID())
-LLM_model = local_storage.getLocalStorageVal("SELECTED_MODEL")
+
+# local_storage = injectWebsocketCode(hostPort='wsauthserver.supergroup.ai', uid=getOrCreateUID())
+LLM_model = get_local_storage_value("SELECTED_MODEL")
 
 if not LLM_model:
     assistant_message =  st.chat_message("GeminiBot",avatar="🤖")
     assistant_message.write("<p style='font-weight: bold; font-size:23px'>Hi.👋Please configure Model through settings </p>",unsafe_allow_html=True)
 else:
-    GOOGLE_API_KEY = local_storage.getLocalStorageVal("Gemini_API_KEY")
+    GOOGLE_API_KEY = get_local_storage_value("Gemini_API_KEY")
     if not GOOGLE_API_KEY:
         assistant_message =  st.chat_message("GeminiBot",avatar="🤖")
         
